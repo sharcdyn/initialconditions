@@ -81,7 +81,7 @@ if(nm) then
  enddo
  close (1)
 elseif(hessian) then
- call hessiano (nat,sat,coord0,nmod,mode, modno,frec, mass)
+ call hessiano (nat,sat,coord0,nmod,mode, modno,frec, mass,noat)
 else
  stop 'nm or hessian.dat are required'
 endif
@@ -291,12 +291,12 @@ end program initial_conditions
 !!! Needed things:
 !!! -diag.f
 
-subroutine hessiano (n,sat,coord0,nmod,mode,modno1, frec1, mass)
+subroutine hessiano (n,sat,coord0,nmod,mode,modno1, frec1, mass,noat)
 implicit none
 integer, intent(in) :: n,nmod
 character*2, intent(in) :: sat(n)
 real*8, intent(in) :: mass(n),coord0(n,3)
-integer, intent(in) :: mode(nmod)
+integer, intent(in) :: mode(nmod),noat(n)
 
 real*8, intent(out) :: modno1(nmod,n,3),frec1(nmod)
 
@@ -403,16 +403,24 @@ do i=1,n3
  enddo
 enddo
 close(1)
+open(2,file="freqs_all.molden")
+call molden (n,sat,noat,coord0,n3,frec,modno,2)
+close(2)
 
 !! Taking only the ones selected by the user
-do i=1,nmod
- frec1(i)=frec(mode(i))
- do j=1,n
-  do k=1,3
-   modno1(i,j,k)=modno(mode(i),j,k)
+if (nmod.ne.0) then
+ do i=1,nmod
+  frec1(i)=frec(mode(i))
+  do j=1,n
+   do k=1,3
+    modno1(i,j,k)=modno(mode(i),j,k)
+   enddo
   enddo
  enddo
-enddo
+ open(2,file="freqs.molden")
+ call molden (n,sat,noat,coord0,nmod,frec1,modno1,2)
+ close(2)
+endif
 
 end subroutine
 
@@ -589,31 +597,38 @@ write(6,*) date," ",time
 return
 end subroutine
 
-subroutine molden (nat,sat,noat,coord0,nmod,frec,modno)
- implicit none
- integer i,j,nat,nmod,noat(nat)
- character*2 sat(nat)
- real*8 coord0(nat,3),modno(nmod,nat,3),frec(nmod)
+subroutine molden (nat,sat,noat,coord0,nmod,frec,modno,un)
+ integer, intent(in) :: nat,nmod,un
+ integer, intent(in) :: noat(nat)
+ character*2,intent(in) :: sat(nat)
+ real*8, intent(in) :: coord0(nat,3),modno(nmod,nat,3),frec(nmod)
+
+ integer i,j
  
- open(97,file="freqs.molden")
+ write(un,"(A)") "[Molden Format]" 
  
- write(97,*) "[Molden Format]" 
- 
- write(97,*) "[Atoms] Angs"
+ write(un,"(A)") "[Atoms] AU"
  do i=1,nat
-  write(97,*) sat(i), i, noat(i), coord0(i,1)/1.889726, coord0(i,2)/1.889726, coord0(i,3)/1.889726
+  write(un,"(A2,2(x,I5),3(x,E20.10e3))") &
+   sat(i), i, noat(i), coord0(i,1), coord0(i,2), coord0(i,3)
  enddo
  
- write(97,*) "[FREQ]"
+ write(un,"(A)") " [FREQ]"
  do i=1,nmod
-  write(97,*) frec(i)*2.194746E5
+  write(un,*) frec(i)*2.194746E5
  enddo
  
- write(97,*) "[FR-COORD]"
+ write(un,"(A)") " [FR-COORD]"
+ do i=1,nat
+  write(un,"(A2,3(x,E20.10e3))") &
+   sat(i), coord0(i,1), coord0(i,2), coord0(i,3)
+ enddo
+
+ write(un,"(A)") " [FR-NORM-COORD]"
  do i=1,nmod
-  write(97,*) "Vibration                     ", i 
+  write(un,"(A,I10)") "Vibration                     ", i 
   do j=1,nat
-   write(97,*) sat(j), modno(i,j,1), modno(i,j,2), modno(i,j,3)
+   write(un,*) modno(i,j,1), modno(i,j,2), modno(i,j,3)
   enddo
  enddo
 end subroutine
