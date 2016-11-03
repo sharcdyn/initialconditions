@@ -1,0 +1,6 @@
+8 18 1001       ### Number of atoms, number of normal modes to sample (usually 3N-6) and grid point
+70. 10.         ### Delta of grid and sampling
+1 10 18534      ### First initial condition, last initial condition and random seed (echo $RANDOM)
+
+24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7   ### Number of the sampled normal modes (usually from 3N to 7)
+ 0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 0 0 0   ### Quantum numbre of every normal mode
