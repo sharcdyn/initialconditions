@@ -13,7 +13,7 @@ integer, allocatable :: seed(:)
 integer, allocatable :: noat(:), mode(:), quantum(:)
 character*2, allocatable :: sat(:)
 real*8 prob, kk, delta1, delta2, xmax
-logical writ, nm, hessian, accepted
+logical writ, nm, hessian, accepted, ex, res
 complex*16, allocatable :: wf(:,:)
 real*8, allocatable :: r(:,:)
 real*8 ZPE, total, kintot, pottot, kintot2
@@ -31,16 +31,36 @@ if (nmod.ne.0) then
  write(6,*) delta1,delta2
 ! Delta1 -> grid
 ! Delta2 -> sampling
- call random_seed(size=nseed)
- allocate(seed(nseed))
- write(6,*) "Initial trajectory, final trajectory and random seed"
- read(5,*) init,ntraj,seed(1)
- write(6,*) init,ntraj,seed(1)
- if (nseed.ne.1) then
-  do i=2,nseed
-   seed(i)=seed(i-1)+1
-  enddo
+
+ write(6,*) "Initial trajectory and final trajectory"
+ read(5,*) init,ntraj
+ write(6,*) init,ntraj
+ inquire(file="seeds.dat",exist=ex)
+ if (ex .eqv. .false.) then
+  open(1,file="seeds.dat")
+  write(6,*) "Generating seeds and storage them in seeds.dat"
+  call random_seed(size=nseed)
+  write(1,*) nseed
+  allocate (seed(nseed))
+  inquire(file="/dev/urandom",exist=res)
+  if (res) then
+   open(2, file='/dev/urandom', access='stream', form='UNFORMATTED')
+   read(2) seed
+   close(2)
+  else
+   call system_clock(count=j)
+   seed = j + 37 * (/ (i - 1, i = 1, nseed) /)
+  endif
+  write(1,*) (seed(i),i=1,nseed)
+  close(1)
+  deallocate(seed)
  endif
+ open(1,file="seeds.dat")
+ read(1,*) nseed
+ allocate(seed(nseed))
+ read(1,*) (seed(i),i=1,nseed)
+close(1)
+
  write(6,*) "Normal modes to scan"
  read(5,*) (mode(i),i=1,nmod)
  write(6,*) "Quantum for the normal modes"
