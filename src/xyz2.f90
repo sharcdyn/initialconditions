@@ -15,10 +15,10 @@ read(5,*) kkchar
 open(1,file=kkchar,status="old",iostat=i)
 if (i.ne.0) stop "File does not exist"
 read(1,*) nat
-read(1,*) kkchar
+read(1,*)
 allocate(at(nat),geom(nat,3),noat(nat),mass(nat))
 do i=1,nat
- read(1,*) at(i),geom(i,:)
+ read(1,*) at(i),(geom(i,j),j=1,3)
  do j=1,3
   geom(i,j)=geom(i,j)/bohr2ang
  enddo
@@ -47,12 +47,12 @@ select case(kkchar)
     write(1,"(A,A,A,4(x,F20.10,A))") &
      '{"atom" : "',at(i),'","xyz" : [ ',&
       geom(i,1),', ',geom(i,2),', ',geom(i,3),&
-     '], "mass" : ',mass(i),' },'
+     ' ], "mass" : ',mass(i),' },'
    else
     write(1,"(A,A,A,4(x,F20.10,A))") &
      '{"atom" : "',at(i),'","xyz" : [ ',&
       geom(i,1),', ',geom(i,2),', ',geom(i,3),&
-     '], "mass" : ',mass(i),' }] }'
+     ' ], "mass" : ',mass(i),' }] }'
    endif
   enddo
  case default
