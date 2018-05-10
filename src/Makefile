@@ -24,7 +24,7 @@ BIN=../bin
 
 OBJS= diag-lapack.o
 
-all: ${BIN} init init_rv xyz2geom
+all: ${BIN} init init_rv xyz2
 
 ${BIN}:
 	${MKDIR_P} ${BIN}
@@ -37,8 +37,8 @@ init_rv:	sharc_init_rv.o
 	$(F90C) $(F90OPTS) -o ${BIN}/sharc_init_rv.exe sharc_init_rv.o $(OBJS) \
         $(LINKOPTS)
 
-xyz2geom:	xyz2geom.o
-	$(F90C) $(F90OPTS) -o ${BIN}/xyz2geom.exe xyz2geom.o $(OBJS) \
+xyz2:	xyz2.o
+	$(F90C) $(F90OPTS) -o ${BIN}/xyz2.exe xyz2.o $(OBJS) \
         $(LINKOPTS)
 
 clean:

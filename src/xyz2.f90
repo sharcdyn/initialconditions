@@ -10,18 +10,54 @@ real*8 :: bohr2ang=0.52917721067
 
 integer i,j
 
-read(5,*) nat
+write(6,*) "XYZ file to be converted"
 read(5,*) kkchar
+open(1,file=kkchar,status="old",iostat=i)
+if (i.ne.0) stop "File does not exist"
+read(1,*) nat
+read(1,*) kkchar
 allocate(at(nat),geom(nat,3),noat(nat),mass(nat))
 do i=1,nat
- read(5,*) at(i),geom(i,:)
+ read(1,*) at(i),geom(i,:)
+ do j=1,3
+  geom(i,j)=geom(i,j)/bohr2ang
+ enddo
  call getnoatandmass(at(i),noat(i),mass(i))
 enddo
 
-open(1,file="geom")
-do i=1,nat
- write(1,"(A2,4(x,F30.20))") at(i),noat(i),geom(i,:)/bohr2ang
-enddo
+write(6,*) "Select type of output file"
+read(5,*) kkchar
+select case(kkchar)
+ case("geom")
+  write(6,*) "Creating file geom"
+  open(1,file="geom")
+  do i=1,nat
+   write(1,"(A2,4(x,F30.20))") at(i),noat(i),geom(i,:)
+  enddo
+ case("bagel")
+  write(6,*) "Creating file geom.json"
+  open(1,file="geom.json")
+  write(1,"(A)") '{ "title" : "molecule", '
+  write(1,"(A)") '"basis" : "",'
+  write(1,"(A)") '"df_basis" : "",'
+  write(1,"(A)") '"angstrom" : true,'
+  write(1,"(A)") '"geometry" : [ '
+  do i=1,nat
+   if (i.ne.nat) then
+    write(1,"(A,A,A,4(x,F20.10,A))") &
+     '{"atom" : "',at(i),'","xyz" : [ ',&
+      geom(i,1),', ',geom(i,2),', ',geom(i,3),&
+     '], "mass" : ',mass(i),' },'
+   else
+    write(1,"(A,A,A,4(x,F20.10,A))") &
+     '{"atom" : "',at(i),'","xyz" : [ ',&
+      geom(i,1),', ',geom(i,2),', ',geom(i,3),&
+     '], "mass" : ',mass(i),' }] }'
+   endif
+  enddo
+ case default
+  write(6,*) "Valid output files are geom or bagel"
+end select
 
 end
 
