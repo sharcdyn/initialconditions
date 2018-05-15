@@ -32,7 +32,7 @@ select case(kkchar)
   write(6,*) "Creating file geom"
   open(1,file="geom")
   do i=1,nat
-   write(1,"(A2,4(x,F30.20))") at(i),noat(i),geom(i,:)
+   write(1,"(A2,x,F5.1,4(x,F30.20))") at(i),noat(i),geom(i,:),mass(i)
   enddo
  case("bagel")
   write(6,*) "Creating file geom.json"
