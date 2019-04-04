@@ -13,7 +13,7 @@ STATIC=no
 
 F77C= $(COMP)
 F90C= $(COMP)
-F90OPTS=-O2
+F90OPTS=-O2 -fopenmp
 F77OPTS=-O2
 LINKOPTS=-I. -llapack
 

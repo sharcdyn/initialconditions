@@ -507,7 +507,7 @@ subroutine wigner(x, p, np, r, wf, prob)
   real*8 r(np),x,p
   complex*16 wf(np)
   real*8 prob
-  complex*16 probability
+  complex*16 probability(-2*np:2*np)
 
   integer i, ii
   complex*16 kk2, val1, val2
@@ -516,7 +516,7 @@ subroutine wigner(x, p, np, r, wf, prob)
   rmax=r(np)
   rmin=r(1)
   dr=(rmax-rmin)/(np-1)
-  probability=dcmplx(0.d0,0.d0)
+!$OMP PARALLEL DO PRIVATE(lr,lr1,lr2,val1,val2,kk2)
   do ii=-2*np,2*np
    lr=ii*dr
    !sum, value of the wavefunction in lr1
@@ -527,11 +527,16 @@ subroutine wigner(x, p, np, r, wf, prob)
    call valr(np,r,wf,lr2,val2)
    kk2=cdexp(dcmplx(0.d0,2.d0*p*lr))
    kk2=dconjg(val1)*val2*kk2
-   probability=probability+kk2
+   probability(ii)=kk2
   enddo
-  probability=1.d0/dacos(-1.d0)*probability*dr
+!$OMP END PARALLEL DO
 
-  prob=real(probability)
+  prob=0.
+  do ii=-2*np,2*np
+   prob=prob+real(probability(ii))
+  enddo
+  prob=1.d0/dacos(-1.d0)*prob*dr
+
 return
 end subroutine
 
