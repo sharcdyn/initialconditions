@@ -45,12 +45,12 @@ select case(kkchar)
   do i=1,nat
    if (i.ne.nat) then
     write(1,"(A,A,A,4(x,F20.10,A))") &
-     '{"atom" : "',at(i),'","xyz" : [ ',&
+     '{"atom" : "',trim(at(i)),'","xyz" : [ ',&
       geom(i,1),', ',geom(i,2),', ',geom(i,3),&
      ' ], "mass" : ',mass(i),' },'
    else
     write(1,"(A,A,A,4(x,F20.10,A))") &
-     '{"atom" : "',at(i),'","xyz" : [ ',&
+     '{"atom" : "',trim(at(i)),'","xyz" : [ ',&
       geom(i,1),', ',geom(i,2),', ',geom(i,3),&
      ' ], "mass" : ',mass(i),' }] }'
    endif
